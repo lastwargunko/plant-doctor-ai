@@ -3,34 +3,17 @@ import { Leaf, Sparkles, ScanLine } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 import DetectionResult from '@/components/DetectionResult';
 import { Button } from '@/components/ui/button';
-
-// Mock detection result - in real app, this would come from an API
-const mockDetectionResult = {
-  disease: 'Bercak Daun (Leaf Spot)',
-  confidence: 94,
-  severity: 'medium' as const,
-  description: 'Bercak daun adalah penyakit yang disebabkan oleh jamur atau bakteri yang menyerang jaringan daun. Penyakit ini umum terjadi pada kondisi kelembaban tinggi dan dapat menyebar dengan cepat jika tidak ditangani.',
-  symptoms: [
-    'Munculnya bercak coklat atau hitam pada permukaan daun',
-    'Bercak memiliki tepi yang jelas dan tengah yang lebih terang',
-    'Daun menguning di sekitar area yang terinfeksi',
-    'Daun yang parah terinfeksi dapat gugur prematur',
-  ],
-  treatment: [
-    'Pangkas dan buang daun yang terinfeksi untuk mencegah penyebaran',
-    'Aplikasikan fungisida berbahan aktif mankozeb atau tembaga',
-    'Kurangi kelembaban dengan memperbaiki sirkulasi udara',
-    'Hindari penyiraman dari atas, siram langsung ke tanah',
-    'Jaga kebersihan area sekitar tanaman dari sisa-sisa tanaman yang terinfeksi',
-  ],
-};
+import { detectPlantDisease, DetectionResponse } from '@/services/plantApi';
+import { toast } from 'sonner';
 
 const Index = () => {
   const [preview, setPreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [result, setResult] = useState<typeof mockDetectionResult | null>(null);
+  const [result, setResult] = useState<DetectionResponse | null>(null);
 
   const handleImageSelect = useCallback((file: File) => {
+    setSelectedFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreview(reader.result as string);
@@ -41,17 +24,24 @@ const Index = () => {
 
   const handleClear = useCallback(() => {
     setPreview(null);
+    setSelectedFile(null);
     setResult(null);
   }, []);
 
-  const handleAnalyze = useCallback(() => {
+  const handleAnalyze = useCallback(async () => {
+    if (!selectedFile) return;
+    
     setIsAnalyzing(true);
-    // Simulate API call
-    setTimeout(() => {
-      setResult(mockDetectionResult);
+    try {
+      const response = await detectPlantDisease(selectedFile);
+      setResult(response);
+    } catch (error) {
+      console.error('Detection error:', error);
+      toast.error('Gagal menganalisis gambar. Pastikan server API aktif.');
+    } finally {
       setIsAnalyzing(false);
-    }, 2000);
-  }, []);
+    }
+  }, [selectedFile]);
 
   return (
     <div className="min-h-screen bg-background">
