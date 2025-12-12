@@ -80,7 +80,7 @@ const DetectionResult = ({ result, isLoading }: DetectionResultProps) => {
     );
   }
 
-  const config = severityConfig[result.severity];
+  const config = severityConfig[result.severity] || severityConfig.medium;
   const Icon = config.icon;
 
   return (
