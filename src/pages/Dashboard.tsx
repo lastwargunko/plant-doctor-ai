@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { 
   Bug, 
   Droplets, 
@@ -14,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { DashboardSkeleton } from "@/components/PageSkeleton";
 
 // Data katalog penyakit
 const diseases = [
@@ -132,6 +134,21 @@ const getSeverityLabel = (severity: string) => {
 };
 
 const Dashboard = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate initial load / check for slow network
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
+
   return (
     <div className="container max-w-6xl mx-auto px-4 py-8">
       {/* Hero Section */}
@@ -184,8 +201,12 @@ const Dashboard = () => {
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {diseases.map((disease) => (
-            <Card key={disease.id} className="glass hover:shadow-lg transition-shadow duration-300">
+          {diseases.map((disease, index) => (
+            <Card 
+              key={disease.id} 
+              className="glass hover:shadow-lg transition-shadow duration-300 animate-fade-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -238,8 +259,12 @@ const Dashboard = () => {
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {careTips.map((tip) => (
-            <Card key={tip.title} className="glass hover:shadow-lg transition-shadow duration-300">
+          {careTips.map((tip, index) => (
+            <Card 
+              key={tip.title} 
+              className="glass hover:shadow-lg transition-shadow duration-300 animate-fade-in"
+              style={{ animationDelay: `${0.6 + index * 0.1}s` }}
+            >
               <CardContent className="pt-6">
                 <div className="flex flex-col items-center text-center">
                   <div className="p-3 rounded-full bg-primary/10 mb-4">
@@ -255,7 +280,7 @@ const Dashboard = () => {
       </section>
 
       {/* CTA */}
-      <section className="text-center py-12">
+      <section className="text-center py-12 animate-fade-in">
         <Card className="glass border-primary/20">
           <CardContent className="pt-8 pb-8">
             <h2 className="text-2xl font-bold text-foreground mb-3">
